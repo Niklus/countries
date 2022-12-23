@@ -1,24 +1,80 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+import Card from "./components/Card";
+import Header from "./components/Header";
 
 function App() {
+  const [countries, setCountries] = useState([]);
+  const [countriesList, setCountriesList] = useState([]);
+  const [searched, setSearched] = useState([]);
+  const [searchResult, setSearchResult] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch("/countries.txt");
+      const result = await response.text();
+      const object = JSON.parse(result);
+      setCountries(Object.values(object));
+      setCountriesList(Object.values(object));
+    };
+    fetchData();
+  }, []);
+
+  const handleSearch = async (e) => {
+    const search = e.target.value.toLowerCase();
+
+    if (search === "") {
+      setSearched(countriesList);
+      setSearchResult(true);
+      return;
+    }
+    const results = countriesList.filter((country) => {
+      return (
+        country.name.toLowerCase().startsWith(search) ||
+        (country.capital.toLowerCase().startsWith(search) &&
+          country.capital !== "N/A")
+      );
+    });
+    setSearched(results);
+    setSearchResult(true);
+  };
+
+  const handleRegions = async (e) => {
+    const region = e.target.value.toLowerCase();
+
+    if (region === "") {
+      setCountriesList(countries);
+      setSearchResult(false);
+      return;
+    }
+
+    const results = countries.filter((country) => {
+      return country.region.toLowerCase() === region;
+    });
+    setCountriesList(results);
+    setSearchResult(false);
+  };
+
+  if (!countries.length) {
+    return <h1>Loading...</h1>;
+  }
+
+  let displayList;
+
+  if (searchResult) {
+    displayList = searched.map((country) => (
+      <Card key={country.name} country={country} />
+    ));
+  } else {
+    displayList = countriesList.map((country) => (
+      <Card key={country.name} country={country} />
+    ));
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header onHandleRegions={handleRegions} onHandleSearch={handleSearch} />
+      <main>{displayList}</main>
+    </>
   );
 }
 
