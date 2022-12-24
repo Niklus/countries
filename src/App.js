@@ -19,7 +19,7 @@ function App() {
     fetchData();
   }, []);
 
-  const handleSearch = async (e) => {
+  const handleSearch = (e) => {
     const search = e.target.value.toLowerCase();
 
     if (search === "") {
@@ -38,7 +38,7 @@ function App() {
     setSearchResult(true);
   };
 
-  const handleRegions = async (e) => {
+  const handleRegions = (e) => {
     const region = e.target.value.toLowerCase();
 
     if (region === "") {
